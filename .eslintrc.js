@@ -29,5 +29,15 @@ module.exports = {
     'eol-last': 0,
     //function左括号(可以没空格
     "space-before-function-paren": 0,
-  }
+    //数字2表示同意缩进2个空格,数字1表示1倍缩进
+    'vue/script-indent': ['error', 2, {'baseIndent': 1}]
+  },
+  overrides:[
+    {
+      'files':['*.vue'],
+      'rules':{
+        'indent':'off'
+      }
+    }
+  ]
 }

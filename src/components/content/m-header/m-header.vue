@@ -7,18 +7,17 @@
 </template>
 
 <script>
-export default {
-  name: 'm-header',
-  data () {
-    return {
+  export default {
+    name: 'm-header',
+    data() {
+      return {}
     }
   }
-}
 </script>
 
 <style scoped lang="stylus">
-//导入css文件的时候不用加~号,加了就报错
-// @import 'assets/css/test.css'
+  //导入css文件的时候不用加~号,加了就报错
+  // @import 'assets/css/test.css'
   @import "~assets/css/variable"
   @import "~assets/css/mixin"
   .m-header
@@ -28,6 +27,7 @@ export default {
     color: $color-theme
     //解决inline-block盒子之间有一个空隙
     font-size: 0
+
     .icon
       display: inline-block
       vertical-align: top
