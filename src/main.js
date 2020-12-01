@@ -2,6 +2,7 @@ import 'assets/css/index.styl'
 import Vue from 'vue'
 import App from './App'
 import router from './router'
+import store from './store/index'
 import 'babel-polyfill'
 // 导入fastclick减少300ms延迟
 import fastclick from 'fastclick'
@@ -19,5 +20,6 @@ Vue.use(VueLazyload, {
 new Vue({
   el: '#app',
   router,
+  store,
   render: h => h(App)
 })

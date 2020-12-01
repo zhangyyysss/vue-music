@@ -9,14 +9,14 @@
       <li v-for="(group,index) in data" :key="index" class="list-group" ref="listGroup">
         <h2 class="list-group-title">{{group.title}}</h2>
         <ul>
-          <li v-for="(item,indez) in group.items" :key="indez" class="list-group-item">
+          <li @click="selectItem(item)" v-for="(item,indez) in group.items" :key="indez" class="list-group-item">
             <img class="avatar" v-lazy="item.avatar" alt="">
             <span class="name">{{item.name}}</span>
           </li>
         </ul>
       </li>
     </ul>
-    <div class="list-shortcut" @touchstart="onShortcutTouchStart" @touchmove.prevent.stop="onShortcutTouchMove">
+    <div class="list-shortcut" v-show="data.length" @touchstart="onShortcutTouchStart" @touchmove.prevent.stop="onShortcutTouchMove">
       <ul>
         <li
           v-for="(item,index) in shortcutList"
@@ -89,6 +89,9 @@
       }
     },
     methods: {
+      selectItem(item) {
+        this.$emit('select', item)
+      },
       onShortcutTouchStart(e) {
         // 拿到我们点击相对应li中设置的data-index的值
         let anchorIndex = getData(e.target, 'index')

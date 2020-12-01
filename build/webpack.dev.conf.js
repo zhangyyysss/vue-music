@@ -12,6 +12,7 @@ const portfinder = require('portfinder')
 //类似于后端node的写法
 const axios = require('axios')
 const express = require('express')
+const bodyParser = require('body-parser')
 
 const app = express()
 const apiRoutes = express.Router()
@@ -68,6 +69,24 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           //res.json 是express中的语法,透传,效果是从qq音乐的返回数据传到本地请求返回的res数据中,数据给到前端
         }).catch(err => {
           // eslint-disable-next-line no-console
+          console.log(err)
+        })
+      })
+
+      // 这里我们代理了一个 post 请求，我们本地实现了 /api/getPurlUrl 这个 post 接口，并且接受的是 json 格式的数据，
+      // 然后转发给 QQ 官网接口的时候，我们添加了 headers，伪造了 referer 和 origin，
+      // 并且把 Content-Type 设置为 application/x-www-form-urlencoded，目的就是为了满足 QQ 官网接口的请求格式
+      app.post('/api/getPurlUrl', bodyParser.json(), function(req, res) {
+        const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
+        axios.post(url, req.body, {
+          headers: {
+            referer: 'http://y.qq.com/',
+            orgin: 'https://y.qq.com',
+            'Content-type': 'application/x-www-form-urlencoded'
+          }
+        }).then((response) => {
+          res.json(response.data)
+        }).catch((err) => {
           console.log(err)
         })
       })

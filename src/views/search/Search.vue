@@ -5,8 +5,8 @@
 <script>
   export default {
     name: 'Search',
-    data() {
-      return {}
+    created() {
+      console.log('search被创建')
     }
   }
 </script>
