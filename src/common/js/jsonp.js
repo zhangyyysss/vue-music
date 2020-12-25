@@ -1,8 +1,11 @@
 import originJSONP from 'jsonp'
 
+// 对外暴露方法,url: 请求服务器地址,data: 参数
 export default function jsonp(url, data, option) {
   return new Promise((resolve, reject) => {
     url += (url.indexOf('?') < 0 ? '?' : '&') + param(data)
+    // 下面的data不是上面的data,上面的data是参数,下面的data是请求之后返回的响应数据data
+    // The callback is called with err, data parameters.
     originJSONP(url, option, (err, data) => {
       if (!err) {
         resolve(data)
@@ -13,6 +16,8 @@ export default function jsonp(url, data, option) {
   })
 }
 
+// 定义一个将Object的参数处理成为url挂载参数的形式的函数
+// &page=10&isso=1&rsv_bp=2
 function param(data) {
   let url = ''
   for (var k in data) {

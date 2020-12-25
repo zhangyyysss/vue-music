@@ -13,6 +13,9 @@ const Search = () => import('@/views/search/Search')
 const Rank = () => import('@/views/rank/Rank')
 const Singer = () => import('@/views/singer/Singer')
 const SingerDetail = () => import('@/views/singer-detail/singer-detail')
+const Disc = () => import('@/views/disc/disc')
+const TopList = () => import('@/views/top-list/top-list')
+const UserCenter = () => import('@/views/user-center/user-center')
 Vue.use(Router)
 const routes = [
   {
@@ -21,15 +24,33 @@ const routes = [
   },
   {
     path: '/recommend',
-    component: Recommend
+    component: Recommend,
+    children: [
+      {
+        path: ':id',
+        component: Disc
+      }
+    ]
   },
   {
     path: '/search',
-    component: Search
+    component: Search,
+    children: [
+      {
+        path: ':id',
+        component: SingerDetail
+      }
+    ]
   },
   {
     path: '/rank',
-    component: Rank
+    component: Rank,
+    children: [
+      {
+        path: ':id',
+        component: TopList
+      }
+    ]
   },
   {
     path: '/singer',
@@ -40,6 +61,10 @@ const routes = [
         component: SingerDetail
       }
     ]
+  },
+  {
+    path: '/user',
+    component: UserCenter
   }
 ]
 

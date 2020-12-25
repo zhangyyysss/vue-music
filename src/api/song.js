@@ -44,7 +44,8 @@ export function getSongsUrl(songs) {
         comm: data,
         req_0: urlMid
       }).then(response => {
-        console.log(response)
+        // response 是qq服务器返回的响应体
+        // console.log(response)
         const res = response.data
         if (res.code === ERR_OK) {
           // 这里面的urlMid和外面的param参数不一样了,这是局部变量
@@ -100,4 +101,26 @@ function genUrlMid(mids, types) {
       platform: '23'
     }
   }
+}
+
+// 请求歌词(需要跨域)
+export function getLyric(mid) {
+  const url = '/api/lyric'
+  const data = Object.assign({}, commonParams, {
+    songmid: mid,
+    pcachetime: +new Date(),
+    platform: 'yqq',
+    hostUin: 0,
+    needNewCode: 0,
+    g_tk: 5381,
+    format: 'json'
+  })
+
+  return axios.get(url, {
+    params: data
+  }).then((res) => {
+    return Promise.resolve(res.data)
+  }).catch(err => {
+    console.log(err)
+  })
 }

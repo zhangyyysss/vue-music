@@ -1,6 +1,6 @@
 <template>
-  <div class="singer">
-    <list-view :data="singers" @select="selectSinger"></list-view>
+  <div class="singer" ref="singer">
+    <list-view :data="singers" @select="selectSinger" ref="listView"></list-view>
     <router-view></router-view>
   </div>
 </template>
@@ -12,11 +12,13 @@
   import ListView from 'components/common/listview/ListView.vue'
   // 我们可以在methods最后,使用扩展运算符的方式,对象映射
   import {mapMutations} from 'vuex'
+  import {playlistMixin} from 'common/js/mixin'
 
   const HOT_NAME = '热门'
   const HOT_SINGER_LEN = 10
 
   export default {
+    mixins: [playlistMixin],
     name: 'Singer',
     components: {
       ListView
@@ -30,6 +32,13 @@
       this._getSingerList()
     },
     methods: {
+      // mixins混入解决底部被遮挡的问题
+      handlePlaylist() {
+        const bottom = this.playList.length ? '60px' : ''
+        this.$refs.singer.style.bottom = bottom
+        this.$refs.listView.refresh()
+      },
+      // 路由跳转到相应个歌手页面,并把相对应的singer设置到state保存起来
       selectSinger(singer) {
         this.$router.push({
           path: `/singer/${singer.id}`
@@ -65,13 +74,14 @@
           // 我们把item.Findex给到一个key保存
           const key = item.Findex
           // 如果map对象没有属性key,那么我们以这个key属性新建一个对象,以title = key ,设置,为了得到a-z
+          // 也让首字母相同的歌手归类
           if (!map[key]) {
             map[key] = {
               title: key,
               items: []
             }
           }
-          // 推入我们的值
+          // 各自的key中的items推入我们的各自的歌手
           map[key].items.push(new Singer({
             id: item.Fsinger_mid,
             name: item.Fsinger_name

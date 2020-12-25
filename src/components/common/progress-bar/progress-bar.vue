@@ -1,6 +1,6 @@
 <template>
   <div class="progress-bar" ref="progressBar" @click="progressClick">
-    <div class="bar-inner">
+    <div class="bar-inner" ref="progressBarInner">
       <div class="progress" ref="progress"></div>
       <!-- touchstart和touchmove需要阻止默认行为，加上.prevent防止其拖动浏览器 -->
       <div class="progress-btn-wrapper" ref="progressBtn"
@@ -40,6 +40,7 @@
         // 为什么不能使用this.$refs.progress.style.width,只能使用this.#refs.progress.clientWidth
         // 前面一个打印出来是含有px单位的,后面是纯数字,建议使用clientWidth
         // this.touch.left = this.$refs.progress.style.width
+        // 记录preogress起始位置
         this.touch.left = this.$refs.progress.clientWidth
         // console.log(this.touch)
       },
@@ -57,11 +58,16 @@
         // 所以最后的限制是只能在0 - this.$refs.progressBar.clientWidth - progressBtn 之间滚动
         const offsetWidth = Math.min(this.$refs.progressBar.clientWidth - progressBtn, Math.max(0, this.touch.left + deltaX))
         this._offset(offsetWidth)
+        this._moveChangePercent(offsetWidth)
       },
       progressTouchEnd(e) {
         // end事件结束时候,我们把标志位重置为false
         this.touch.initiated = false
         this._triggerPercent()
+      },
+      _moveChangePercent(offsetWidth) {
+        const movePercent = offsetWidth / (this.$refs.progressBar.clientWidth - progressBtn)
+        this.$emit('movePercent', movePercent)
       },
       _triggerPercent() {
         const barWidth = this.$refs.progressBar.clientWidth - progressBtn
@@ -81,7 +87,15 @@
         // 想想:我们点击一个位置,这个时候事件对象就会记录我们点击下来的offsetX,就是点击位置的的对象(这里是class="progress-bar"的div)的左偏移量e.offsetX
         // 因为是单击事件,不需要e.touched[0]取得事件对象,直接e就可以了
         // 我们把这个点击事件放在那个div最合适呢? 放在class为"progress-bar"也可以是"inner-bar"都可以哦
-        this._offset(e.offsetX)
+        // 有一个bug,就是我们点击按钮位置的时候,按钮跑回初始点,为什么呢?因为e.offset,事件冒泡到父元素,
+        // offsetX鼠标相对于事件源元素（srcElement）的X,Y坐标，只有IE事件有这2个属性，标准事件没有对应的属性。
+        // 获得的e.offset是按钮的e.offset很小,所以就跳到最前面,
+        // 也可以使用老师的方法this.$refs.progressBarInner.getBoundingClientRect()
+        // 也可以使用兼容方法 this.$refs.progressBarInner.offsetLeft
+        // 打印的是一个DOMrect对象,里面包含着好多内容
+        // bottom 554,height 4,left 79.5,right 295.5,top 550,width 216,x 79.5,y 550
+        let rect = this.$refs.progressBarInner.offsetLeft
+        this._offset(e.pageX - rect)
         this._triggerPercent()
       }
     },

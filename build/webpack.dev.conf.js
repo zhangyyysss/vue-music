@@ -1,4 +1,5 @@
 'use strict'
+// 这个是webpack本地打包使用的服务接口...还有一些文件地址
 const utils = require('./utils')
 const webpack = require('webpack')
 const config = require('../config')
@@ -15,11 +16,6 @@ const express = require('express')
 const bodyParser = require('body-parser')
 
 const app = express()
-const apiRoutes = express.Router()
-
-//这句话的意思是,当请求路径为/api的时候,就扔给apiRoutes来处理
-app.use('/api', apiRoutes)
-//后端代理 绕过host以及referer
 
 const HOST = process.env.HOST
 const PORT = process.env.PORT && Number(process.env.PORT)
@@ -54,6 +50,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     watchOptions: {
       poll: config.dev.poll,
     },
+    // https://blog.csdn.net/HermitSun/article/details/86766299 Axios+Express简单实现前后端通信
     before(app){//前端请求我们代理服务器地址 ,我们的代理服务器再去请求qq音乐的服务器
       app.get('/api/getDiscList', (req, res) => {//到代理服务器接收到地址为/api/getDiscList的get请求会执行以下操作
         const url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'//真正的qq音乐推荐地址
@@ -67,9 +64,9 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           res.json(response.data)
           //拿到返回的响应头里面的数据,通过res.json()输出到浏览器端,如果请求成功,就向浏览器返回json类型的数据,res是我们本地请求本地服务器的response,response是本地服务器请求qq的返回的response
           //res.json 是express中的语法,透传,效果是从qq音乐的返回数据传到本地请求返回的res数据中,数据给到前端
-        }).catch(err => {
+        }).catch(e => {
           // eslint-disable-next-line no-console
-          console.log(err)
+          console.log(e + '本地服务器请求数据失败')
         })
       })
 
@@ -86,8 +83,73 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           }
         }).then((response) => {
           res.json(response.data)
-        }).catch((err) => {
-          console.log(err)
+        }).catch((e) => {
+          console.log(e + '本地服务器请求数据失败')
+        })
+      })
+
+      // 歌单的歌曲列表数据请求
+      app.get('/api/lyric', function(req, res) {
+        const url = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
+        axios.get(url, {
+          headers: {
+            referer: 'https://c.y.qq.com',
+            host: 'c.y.qq.com'
+          },
+          params: req.query
+        }).then((response) => {
+          // 如果是jsonp对象,我们转化成json对象
+          let ret = response.data
+          if (typeof ret === 'string') {
+            const reg = /^\w+\(({.+})\)$/
+            const matches = ret.match(reg)
+            if (matches) {
+              ret = JSON.parse(matches[1])
+            }
+          }
+          res.json(ret)
+        }).catch((e) => {
+          console.log(e + '本地服务器请求数据失败')
+        })
+      })
+
+      //歌单的歌曲列表数据请求
+      app.get('/api/getCdInfo', function (req, res) {
+        const url = 'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg'
+        axios.get(url, {
+          headers: {
+            referer: 'https://c.y.qq.com/',
+            host: 'c.y.qq.com'
+          },
+          params: req.query
+        }).then((response) => {
+          let ret = response.data
+          if (typeof ret === 'string') {
+            const reg = /^\w+\(({.+})\)$/
+            const matches = ret.match(reg)
+            if (matches) {
+              ret = JSON.parse(matches[1])
+            }
+          }
+          res.json(ret)
+        }).catch((e) => {
+          console.log(e)
+        })
+      })
+
+      // 获取search检索数据
+      app.get('/api/search', function (req, res) {
+        const url = 'https://c.y.qq.com/soso/fcgi-bin/search_for_qq_cp'
+        axios.get(url, {
+          headers: {
+            referer: 'https://c.y.qq.com/',
+            host: 'c.y.qq.com'
+          },
+          params: req.query
+        }).then((response) => {
+          res.json(response.data)
+        }).catch((e) => {
+          console.log(e)
         })
       })
     }

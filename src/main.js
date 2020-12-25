@@ -7,7 +7,12 @@ import 'babel-polyfill'
 // 导入fastclick减少300ms延迟
 import fastclick from 'fastclick'
 import VueLazyload from 'vue-lazyload'
+import Vconsole from 'vconsole'
 
+let vConsole = new Vconsole()
+Vue.use(vConsole)
+
+console.log('test')
 Vue.config.productionTip = false
 
 fastclick.attach(document.body)

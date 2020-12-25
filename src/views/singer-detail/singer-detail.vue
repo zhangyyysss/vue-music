@@ -47,6 +47,7 @@
           this.$router.push('/singer')
           return
         }
+        // 根据父路由传过来的this.singer的id属性,我们去数据请求相对应的歌曲
         getSingerDetail(this.singer.id).then(res => {
           if (res.code === ERR_OK) {
             processSongsUrl(this._normalizeSongs(res.data.list)).then((songs) => {
@@ -77,6 +78,8 @@
   .slide-enter-active, .slide-leave-active
     transition: all 0.3s
 
+    // 实现是在偏移后的右侧 ,所以进场的时候 ,所以是从右侧往左侧走
+    //  退场的时候是从 translateX(0%) -> translateX(100%)的过程
   .slide-enter,.slide-leave-to
     transform: translateX(100%)
 </style>

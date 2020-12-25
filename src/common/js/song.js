@@ -1,4 +1,6 @@
-import {getSongsUrl} from 'api/song'
+import {getSongsUrl, getLyric} from 'api/song'
+import {ERR_OK} from 'api/config'
+import {Base64} from 'js-base64'
 
 export default class Song {
   constructor({id, mid, singer, name, album, duration, image, url}) {
@@ -9,16 +11,30 @@ export default class Song {
     this.album = album
     this.duration = duration
     this.image = image
-    // 可有可无
-    this.filename = `C400${this.mid}.m4a`
     this.url = url
+  }
+
+  getLyric() {
+    if (this.lyric) {
+      return Promise.resolve(this.lyric)
+    }
+    return new Promise((resolve, reject) => {
+      getLyric(this.mid).then(res => {
+        if (res.retcode === ERR_OK) {
+          this.lyric = Base64.decode(res.lyric)
+          resolve(this.lyric)
+        } else {
+          reject(new Error('no lyric'))
+        }
+      })
+    })
   }
 }
 
 // 使用工厂方法实例化
-// musicData的数据是一样的,所以我们可以用工厂方法来抽象使用
+// musicData的数据是一样的(歌曲的数据都是一样的),所以我们可以用工厂方法来抽象使用
 // musicData是一个对象
-// singer 是一个数组
+// singer 是一个数组,所以这里传入singer数组是为了处理后得到singer歌手的的值
 export function createSong(musicData) {
   return new Song({
     id: musicData.songid,

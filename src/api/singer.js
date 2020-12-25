@@ -14,7 +14,7 @@ export function getSingerList() {
     needNewCode: 0,
     platform: 'yqq'
   })
-
+  // url是请求的地址,data是请求参数query,options是jsonp的回调函数(好像没怎么用到这个?)
   return jsonp(url, data, options)
 }
 

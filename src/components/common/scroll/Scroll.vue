@@ -24,7 +24,7 @@
         default: true
       },
       /*
-      *  列表的数据
+      *  列表的数据,watch:{data} 刷新scroll列表
       * */
       data: {
         type: Array,
@@ -36,10 +36,34 @@
       listenScroll: {
         type: Boolean,
         default: false
+      },
+      /*
+      * 是否能上拉加载更多
+      * */
+      pullup: {
+        type: Boolean,
+        default: false
+      },
+      // 试一下pullupLoad是否管用,低版本无用
+      // pullUpLoad: {
+      //   type: Boolean,
+      //   default: false
+      // }
+      /*
+      *  scroll组件在滚动之前会派发一个事件叫做beforeScrollStart,我们在这个事件做input失去焦点的操作
+      *
+      * */
+      beforeScroll: {
+        type: Boolean,
+        default: false
+      },
+      refreshDelay: {
+        type: Number,
+        default: 20
       }
     },
     mounted() {
-      // 我们选择这mounted 延时20ms 初始化这个BScroll插件,我们只能确保dom是渲染上了,但是异步加载过来的数据我们是无法保证加载上的,所以无法确保一定可以有高度保证我们滚动正常
+      // 我们选择这mounted 延时20ms 初始化这个BScroll插件,我们只能确保dom是渲染上了,但是异步加载过来的数据(例如图片加载)我们是无法保证加载上的,所以无法确保一定可以有高度保证我们滚动正常
       setTimeout(() => {
         this._initScroll()
       }, 20)
@@ -53,17 +77,51 @@
         // better-scroll的初始化,将父组件传值过来再实现初始化~
         this.scroll = new BScroll(this.$refs.wrapper, {
           probeType: this.probeType,
-          click: this.click
+          click: this.click,
+          pullUpLoad: this.pullUpLoad
         })
 
         if (this.listenScroll) {
-          // 保留vue实例的this到me变量
+          // 保留vue实例的this到me变量(这是因为老版本需要把?)
           let me = this
           // console.log(this) Vue
           this.scroll.on('scroll', pos => {
             // 因为scroll组件里面的this,例如这里的this.$emit('scroll', pos),this是指向scroll,所以我们要保持vue的this
             me.$emit('scroll', pos)
             // console.log(this) Vue
+          })
+        }
+        // 上拉加载,1.0版本
+        if (this.pullup) {
+          // scrollEnd 表示scroll滚动结束的位置停止了,scrollToEnd表示它快滚动到底部了
+          // scrollEnd :触发时机：滚动结束，或者让一个正在滚动的 content 强制停止
+          // 首先this.scroll.y是一个负值,this.scroll.maxScrollY是一个滚动区域内最大的负值 + 50 就是提前50px执行了scrollToEnd
+          // 每次滚动结束
+          this.scroll.on('scrollEnd', () => {
+            // 当scroll快滚动到底部了
+            if (this.scroll.y <= this.scroll.maxScrollY + 50) {
+              this.$emit('scrollToEnd')
+            }
+          })
+        }
+        // 试一下pullUpLoad,低版本无用,这是高版本的方法,只能使用上面的完成上拉加载
+        // if (this.pullUpLoad) {
+        //   console.log('111111')
+        //   this.scroll.on('pullingUp', () => {
+        //     this.$emit('pullingUp')
+        //   })
+        // }
+        // 在滚动之前我们派发一个ber
+        if (this.beforeScroll) {
+          this.scroll.on('beforeScrollStart', () => {
+            this.$emit('beforeScroll')
+          })
+        }
+
+        // 轻浮的时候我们派发一个事件flick
+        if (this.beforeScroll) {
+          this.scroll.on('flick', () => {
+            this.$emit('beforeFlick')
           })
         }
       },
@@ -95,7 +153,7 @@
       data() {
         setTimeout(() => {
           this.refresh()
-        }, 20)
+        }, this.refreshDelay)
       }
     }
   }

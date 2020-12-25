@@ -32,7 +32,9 @@
     <div class="list-fixed" v-show="fixedTitle" ref="fixed">
       <h1 class="fixed-title">{{fixedTitle}}</h1>
     </div>
-    <loading class="loading" v-show="!data.length"></loading>
+    <div class="loading-container" v-show="!data.length">
+      <loading></loading>
+    </div>
   </scroll>
 
 </template>
@@ -89,6 +91,9 @@
       }
     },
     methods: {
+      refresh() {
+        this.$refs.listview.refresh()
+      },
       selectItem(item) {
         this.$emit('select', item)
       },
@@ -283,7 +288,7 @@
         font-size $font-size-small
         color $color-text-l
         background $color-highlight-background
-    .loading
+    .loading-container
       position absolute
       width: 100%
       top 50%
