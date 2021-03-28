@@ -1,4 +1,5 @@
 // https://eslint.org/docs/user-guide/configuring
+// https://blog.csdn.net/q3254421/article/details/86477502 可以看看eslint不同的设置
 
 module.exports = {
   root: true,

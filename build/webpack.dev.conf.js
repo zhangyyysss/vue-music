@@ -73,8 +73,26 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       // 这里我们代理了一个 post 请求，我们本地实现了 /api/getPurlUrl 这个 post 接口，并且接受的是 json 格式的数据，
       // 然后转发给 QQ 官网接口的时候，我们添加了 headers，伪造了 referer 和 origin，
       // 并且把 Content-Type 设置为 application/x-www-form-urlencoded，目的就是为了满足 QQ 官网接口的请求格式
+      // bodyParser中间件使用bodyParser.json()对请求体进行序列化解析json数据,所以下面可以直接通过req.body得到序列化过后的字符串
+      //最后，bodyParser是对中间件的引用。请求体解析后，解析值都会被放到req.body属性，所以直接拿出来就行了。
+      // https://www.jianshu.com/p/94e09847dcb3
+      /*
+      * req.params  一个数组，包含命名过的路由参数。
+      *
+      * req.param(name) 返回命名的路由参数，或者 GET 请求或 POST 请求参数。建议你忽略此方法。
+      *
+      * req.query  一个对象，包含以键值对存放的查询字符串参数（通常称为 GET 请求参数）
+      *
+      * req.body 一个对象，包含 POST 请求参数。这样命名是因为 POST 请求参数在 REQUEST 正文中传递，
+      * 而不像查询字符串在 URL 中传递。要使 req.body 可用，需要中间件能够解析请求正文内容类型。
+      * */
+      // 首先后端接受这个post请求,所以前端访问'/api/getPurlUrl'都会后端代理这个请求,并且接受的是json格式的数据
+      // 我们在这个代理中再做一个axios请求,伪造请求头部中的 referer头和orgin和 'Content-type'
+      // 我们使用处理过的req.body作为参数去请求数据
       app.post('/api/getPurlUrl', bodyParser.json(), function(req, res) {
         const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
+        // 因为是post请求,所以参数是在response.body里面,因为之前我们做过序列化操作,所以可以直接传入当成params
+        // 所以req.body序列化过后的,应该是一个字符串?????????
         axios.post(url, req.body, {
           headers: {
             referer: 'http://y.qq.com/',

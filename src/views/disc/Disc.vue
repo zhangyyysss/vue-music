@@ -36,6 +36,7 @@
     },
     created() {
       this._getSongList()
+      console.log(this.$route.params)
     },
     methods: {
       _getSongList() {

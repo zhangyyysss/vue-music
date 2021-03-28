@@ -19,7 +19,7 @@
 </script>
 
 <style scoped lang="stylus">
-  //导入css文件的时候不用加~号,加了就报错
+  //导入css文件的时候如果不加~号,不加了就报错.脚手架4创建的项目一就不需要加~
   // @import 'assets/css/test.css'
   @import "~assets/css/variable"
   @import "~assets/css/mixin"

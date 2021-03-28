@@ -72,6 +72,10 @@
         })
       },
       // ,mixins混入解决底部被遮挡的问题
+      // 如果把scroll组件做成v-if="discList.length"会有一个生命周期的问题,虽然可以解决滚动的问题,我们确保有discList数据,我们采取渲染scroll组件,所以计算的高度是准确的
+      // 首先handlePlaylist是在所有vue生命周期前执行的?为什么?因为mixins,会优先执行里面的生命周期
+      // 此时因为是v-if="discList.length",scroll组件还没有被加载在模板中,所以this.$refs.recommend是拿不到scroll组件的所以报错了
+      // 我们做成:data="discList" 传入数据再执行refresh()比较稳妥
       handlePlaylist() {
         const bottom = this.playList.length ? '60px' : ''
         this.$refs.recommend.style.bottom = bottom
@@ -79,11 +83,13 @@
       },
       // 点击推荐歌单事件(和singer.vue中selectSinger一样的,路由跳转而已,我们想要歌单数据传到歌单详情页,跟歌手一样的)
       selectItem(item, index) {
+        // this.$router.push(`/recommend/${item.dissid}`)等效于下面的代码
         // this.$router.push(`/recommend/${item.dissid}`)
+        console.log(item)
         this.$router.push({
           path: `/recommend/${item.dissid}`
         })
-        // 把点击的item对象传进vuex中保管
+        // 把点击的item,歌单信息对象传进vuex中保管
         this.setDisc(item)
       },
       ...mapMutations({

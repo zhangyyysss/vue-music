@@ -22,7 +22,9 @@
       <div class="song-list-wrapper">
         <song-list :rank="rank" :songs="songs" @select="selectItem"></song-list>
       </div>
-      <loading class="loading-container" v-show="!songs.length"></loading>
+      <div class="loading-container">
+        <loading v-show="!songs.length"></loading>
+      </div>
     </scroll>
   </div>
 </template>
@@ -86,7 +88,8 @@
       // 将背景图片的clientHeight高度存储在变量this.imageHeight中
       this.imageHeight = this.$refs.bgImage.clientHeight
       this.minTranslateY = -this.imageHeight + RESERVE_HEIGHT
-      // 给歌曲列表固定top值,
+      // 给歌曲列表固定top值,因为list没有设置top值,以bottom作为底部
+      // 我们需要设置top来限制滚动区域的同时,和bg-layer同步
       this.$refs.list.$el.style.top = `${this.imageHeight}px`
     },
     methods: {
@@ -140,7 +143,7 @@
         let scale = 1
         // 设置一个高斯模糊值blur
         let blur = 0
-        // 滚动无缝贴合的percent参数
+        // 滚动无缝贴合的percent参数(0-1)
         const percent = Math.abs(newVal / this.imageHeight)
 
         // 之所以使用style['transfrom']的方式,不使用style.transform是因为下面可以加上webkitTransform
@@ -149,6 +152,7 @@
         if (newVal > 0) {
           scale = 1 + percent
           zIndex = 10
+          // 这个放大照片,位置也会放大,所以我们需要提升照片的高度zIndex = 10, 全都是细节!
           this.$refs.bgImage.style[transform] = `scale(${scale})`
           // 否则就是往上拉 1.透明度
         } else {
@@ -164,17 +168,24 @@
         if (newVal < this.minTranslateY) {
           zIndex = 10
           this.$refs.bgImage.style.paddingTop = `${RESERVE_HEIGHT}px`
-          this.$refs.bgImage.style['filter'] = ''
+          // this.$refs.bgImage.style['filter'] = ''
           this.$refs.playbtn.style.display = 'none'
           // 还没有顶边的情况
           // 1.设置bgImage的paddingTop = `70%`
-          // 2.设置bgImage的height = 0 (测试用padding-top代替可以啊)
           // 3.将playbtn显示
         } else {
+          // 因为我们的bgImage是靠着paddingTop来撑开的,我们滚动区域就是下面的一小个区域,但是
+          // 滚动的时候bg-layer层级介于bgImage- bg-layer - list ,不能太高,盖住list,就无法滚动了
+          // 不能太低,太低,向上滚动盖不住bgImage,因为我们是按照样式和html来写样式,后来居上,所以层级顺序也是bgImage- bg-layer - list
+          // 所以我们就没有写index了,写了也没关系,依次变大,
+          // 所以思路就是,我们滚动scroll层,bg-layer跟着往上移动,bg-layer盖住照片层,但是我们设置了一个最大滚动范围
+          // 到了最大滚动范围,将图片padding-top 设置为40px,设置z-index,顶部才能盖住歌曲,随机播放按钮设置为display:none隐藏按钮
+          // 相反,就是给图片设置paddingTop,设置按钮显示出来:display:block
+          // 注意,bg-image - bg-layer -scroll滚动层, 都是在一个层级,使用的是障眼法!!!!!
           this.$refs.bgImage.style.paddingTop = `70%`
-          // this.$refs.bgImage.style.height = 0
           this.$refs.playbtn.style.display = 'block'
         }
+        // 统一设置zIndex
         this.$refs.bgImage.style.zIndex = zIndex
       }
     }
@@ -231,6 +242,13 @@
         bottom 20px
         width 100%
         z-index 50
+        // 这个play类主要功能就是
+        // 1.做外边框,
+        // 2.div水平居中(定位)
+        // 3.div内文本水平居中
+        // 4.div内文本颜色
+        // 5.消除里面内敛元素的间隙font-size: 0,
+        // 需要子内联元素重新定义字体大小,否则继承font-size: 0 不显示
         .play
           box-sizing border-box
           width 135px
@@ -241,6 +259,10 @@
           color $color-theme
           border-radius 100px
           font-size 0
+          // icon图标和文本采用i标签和span标签 行内元素 display:inline-block
+          // 1.vertical-middle: middle 行内元素中线对齐
+          // 2.设置字体大小撑起来
+          // 3.margin设置间距
           .icon-play
             display: inline-block
             vertical-align: middle
@@ -250,6 +272,7 @@
             display: inline-block
             vertical-align: middle
             font-size: $font-size-small
+      // filter就是bg-image的铺满遮罩层,我们用来做虚化背景的效果
       .filter
         position absolute
         top 0
@@ -259,19 +282,36 @@
         background: rgba(7, 17, 27, .4)
         transform-origin top
         background-size cover
+    // bg-layer我们用来做移动后,他也会向上滚动,看起来视觉效果,像是拖这一个黑色的背景往上走
+    // 高度就是手机屏幕高度,父元素的100%,就是music-list,
+    // 所以铺满全屏,因为是绝对定位占据空间,并且bg-image的padding-top 70%推下去了
+    //  如果是absolute,因为没有内容,所以宽度为0,背景颜色就没有了,就不是一块黑色的背景
+    // 但是我们给宽度不就行了,所以这个层,是absolute也行,是relative也行
     .bg-layer
-      position relative
+      position absolute
+      width 100%
       height 100%
       background: $color-background
+    // scroll滚动模块
+    // 为什么list需要固定高度,有固定高度,scroll组件才可以正常滚动啊
+    // 如果我们设置了.list的固定高度height:100%,一开始没问题,到后面再进入歌曲画面就会有顶页的问题(不建议使用)
+    // 因为我们设置了position: absolute 并且 bottom 0,所以是底部着地,头部在很上很上面
+    // 所以我们需要设置top值,让他变的小小个!包裹着列表li
+    // 为什么mounted要给这个滚动容器一个固定的高度呢?我们直接给一个高度不行吗?
+    // 答案是不行,因为这个高度是一个动态高度,是根据我们照片的clientHeight计算出来的top值
+    // 每个设备显示照片的clientHeight都不同,为什么不同,因为我们的照片是用padding-top 70%
+    // 所以越大的设备,相反的,照片也越大,如果我们使用固定的top值,就会显示在很上层,并且向上拖动的时候,我们的
+    // bg-layer层和list层是无法同步的,根本就不是重叠一起,所以说我们这个top必须动态设置
     .list
       position absolute
-      top 0
       bottom 0
       width 100%
       // overflow hidden
       background: $color-background
+      // 设置song-list两边padding
       .song-list-wrapper
         padding: 20px 30px
+        // 如果没有歌曲的包裹定位
       .loading-container
         position absolute
         width 100%

@@ -47,6 +47,7 @@
           this.$router.push('/singer')
           return
         }
+        console.log(this.$route.params.id)
         // 根据父路由传过来的this.singer的id属性,我们去数据请求相对应的歌曲
         getSingerDetail(this.singer.id).then(res => {
           if (res.code === ERR_OK) {

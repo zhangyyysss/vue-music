@@ -587,7 +587,7 @@
         let opacity
         if (this.currentShow === 'cd') {
           // console.log('cd' + this.touch.percent)
-          if (this.touch.percent > 0.2) {
+          if (this.touch.percent > 0.1) {
             // 如果移动比例 > 0.2 那么我们设置最终的偏移量就是屏幕的宽度,且opacity 透明, 将this.currentShow = 'lyric'标志位修改了下一个
             offsetWidth = -window.innerWidth
             opacity = 0
@@ -604,7 +604,7 @@
           // if (this.touch.percent === 0) {
           //   return
           // }
-          if (this.touch.percent < 0.8) {
+          if (this.touch.percent < 0.9) {
             offsetWidth = 0
             opacity = 1
             this.currentShow = 'cd'

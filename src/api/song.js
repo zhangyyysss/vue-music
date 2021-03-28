@@ -9,6 +9,7 @@ import { ERR_OK } from 'api/config'
 // const url = debug ? '本地服务器' : '远程服务器'
 export function getSongsUrl(songs) {
   // const url = debug ? 'api/getPurlUrl' : '远程的url地址'
+
   const url = '/api/getPurlUrl'
 
   // 建立存储mids(歌曲代码)的数组和types的数组(都是0)
@@ -21,7 +22,21 @@ export function getSongsUrl(songs) {
     types.push(0)
   })
 
-  // 返回一整个param参数对象,mids(歌曲代码数组),types(0的数组)
+  // 返回一个对象
+  // return {
+  //   module: 'vkey.GetVkeyServer',
+  //   method: 'CgiGetVkey',
+  //   param: {
+  //     // guid 一个随机数,这个随机数决定了guid的值在页面中永恒在,组成了guid的值
+  //     guid,
+  //     // mids的数组作为参数传入和types的数组(都是0)
+  //     songmid: mids,
+  //     songtype: types,
+  //     uin: '0',
+  //     loginflag: 0,
+  //     platform: '23'
+  //   }
+  // }
   const urlMid = genUrlMid(mids, types)
   // 合成访问的必要data参数对象
   const data = Object.assign({}, commonParams, {
@@ -38,6 +53,7 @@ export function getSongsUrl(songs) {
     let tryTime = 3
 
     // 带着上面的参数(data,urlMid)去dev.serve 访问本地服务器代理去访问qq服务器'https://u.y.qq.com/cgi-bin/musicu.fcg'
+    // 通过本地服务器的json解析获得的参数,req.body得到序列化的参数才能去post请求哦~
     // 然后得到数据response,我们可以得到我们想要的url地址就是response.data.req_0.data.midurlinfo.purl
     function request() {
       return axios.post(url, {
@@ -59,6 +75,7 @@ export function getSongsUrl(songs) {
               }
             })
             // 如果prulMap对象有属性, 则导出这个对象
+            // 为什么可以使用resolve,因为包围包裹着一个return promise,所以外层,then就可以获得这个purlMap对象
             if (Object.keys(purlMap).length > 0) {
               resolve(purlMap)
             } else {
@@ -84,7 +101,7 @@ export function getSongsUrl(songs) {
   })
 }
 
-// 返回一个parmas对象,里面包含请求的具体参数
+// 返回一个对象,里面包含请求的具体参数,包含param对象
 function genUrlMid(mids, types) {
   const guid = getUid()
   return {

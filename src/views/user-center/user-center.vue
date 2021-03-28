@@ -127,28 +127,35 @@
     position: fixed
     top: 0
     bottom: 0
-    z-index: 100
+    z-index: 200
     width: 100%
     background: $color-background
     // 移入移出的动画
+
     &.slide-enter-active, &.slide-leave-active
       transition: all 0.3s
+
     &.slide-enter, &.slide-leave-to
       transform: translate3d(100%, 0, 0)
-      // 按钮布局绝对定位
+
+    // 按钮布局绝对定位
+
     .back
       position absolute
       top 0
       left 6px
       z-index 50
       // block padding 字符大小和颜色
+
       .icon-back
         display block
         padding 10px
         font-size $font-size-large-x
         color $color-theme
+
     .switches-wrapper
       margin 10px 0 30px 0
+
     .play-btn
       box-sizing border-box
       width 135px
@@ -160,25 +167,31 @@
       // 清除两个inline-block的空隙
       font-size 0
       // 两个inline-block使用vertical-align: middle
+
       .icon-play
         display inline-block
         margin-right 6px
         vertical-align middle
         font-size $font-size-medium-x
+
       .text
         display: inline-block
         vertical-align: middle
         font-size: $font-size-small
+
     .list-wrapper
       position: absolute
       top: 110px
       bottom: 0
       width: 100%
+
       .list-scroll
         height: 100%
         overflow: hidden
+
         .list-inner
           padding: 20px 30px
+
     .no-result-wrapper
       position: absolute
       width: 100%
