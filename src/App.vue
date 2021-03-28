@@ -11,7 +11,7 @@
 
 <script>
   import MHeader from 'components/content/m-header/m-header'
-  import Tab from 'components/content/tab/tab'
+  import Tab from 'components/content/tab/Tab'
   import Player from 'components/content/player/player'
 
   export default {
