@@ -55,7 +55,7 @@ module.exports = {
     // assetsPublicPath:项目目录 ，是根目录的意思
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: './',
+    assetsPublicPath: '',
 
     /**
      * Source Maps
