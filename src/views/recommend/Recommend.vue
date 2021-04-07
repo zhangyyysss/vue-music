@@ -2,7 +2,16 @@
   <div class="recommend"  ref="recommend">
     <scroll class="recommend-content" :data="discList" ref="recommendContent">
       <div>
-        <div class="slider-wrapper">
+        <!--  这里的v-if="recommends.length > 0"是非常有必要的,因为请求的recommends是一个异步的过程,所以如果在请求完成前我们就渲染了slider组件,那么我们slider中计算的轮播图高度宽度都是不准确的    -->
+        <!--  所以我们加上v-if="recommends.length > 0",是确保了数据recommends的存在(轮播图的数据存在),并且才开始进去slider中渲染slider组件,这个时候的轮播图计算就是正确的拉  -->
+        <div class="slider-wrapper" v-if="recommends.length > 0">
+          <slider>
+            <div v-for="(item, index) in recommends" :key="index">
+              <a :href="item.linkUrl">
+                <img :src="item.picUrl" alt="">
+              </a>
+            </div>
+          </slider>
         </div>
         <div class="recommend-list">
           <div class="list-title">热门歌单推荐</div>
@@ -34,6 +43,7 @@
 
 <script>
   import Loading from 'components/common/loading/Loading.vue'
+  import Slider from 'components/common/slider/Slider.vue'
   import Scroll from 'components/common/scroll/Scroll.vue'
   import {getRecommend, getDiscList} from 'api/recommend.js'
   import {ERR_OK} from 'api/config.js'
@@ -45,10 +55,12 @@
     name: 'Recommend',
     components: {
       Scroll,
-      Loading
+      Loading,
+      Slider
     },
     data() {
       return {
+        recommends: [],
         discList: []
       }
     },
@@ -59,7 +71,9 @@
     methods: {
       _getRecommend() {
         getRecommend().then((res) => {
-          console.log(res)
+          if (res.code === ERR_OK) {
+            this.recommends = res.data.slider
+          }
         })
       },
       _getDiscList() {
@@ -86,9 +100,7 @@
         // this.$router.push(`/recommend/${item.dissid}`)等效于下面的代码
         // this.$router.push(`/recommend/${item.dissid}`)
         console.log(item)
-        this.$router.push({
-          path: `/recommend/${item.dissid}`
-        })
+        this.$router.push(`/recommend/${item.dissid}`)
         // 把点击的item,歌单信息对象传进vuex中保管
         this.setDisc(item)
       },
@@ -110,6 +122,10 @@
     .recommend-content
       height: 100%
       overflow: hidden
+      .slider-wrapper
+        position: relative
+        width: 100%
+        overflow: hidden
 
     .recommend-list
       .list-title

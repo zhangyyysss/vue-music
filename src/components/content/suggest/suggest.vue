@@ -70,7 +70,9 @@
         // 标识符判断数据是否全部加载完毕(数据库还有没有数据了)
         hasMore: true,
         // 设置滚动前设置为true,开启beforeScrollStart事件
-        beforeScroll: true
+        beforeScroll: true,
+        // 网速过慢,我们设置一个标识符,判断请求是否完成,完成才能触发下一次请求(防止重复请求)
+        isRepeat: true
       }
     },
     // 这个数据和父组件的关系不大,和其他耦合度不大的请求,可以在子组件中完成传递
@@ -105,6 +107,8 @@
         this.$refs.suggest.scrollTo(0, 0)
         // 传入输入的query,控制keyWord,传入 this.page控制页面,传入this.showSinger控制展不展示歌手,传入定量perpage控制获取多少首歌曲
         search(this.query, this.page, this.showSinger, perpage).then((res) => {
+          // 第一次查询也要将请求锁解开
+          this.isRepeat = false
           this.hasMore = true
           if (res.code === ERR_OK) {
             // console.log(res.data)
@@ -124,11 +128,16 @@
         if (!this.hasMore) {
           return false
         }
+        // 加入一个请求锁,防止用户多次点击,等待数据返回后打开锁
+        if (this.isRepeat) return false
+        this.isRepeat = true
         this.page++
         search(this.query, this.page, this.showSinger, perpage).then((res) => {
           if (res.code === ERR_OK) {
             // 将新的数据拼接到之前的this.result之后
             this._genResult(res.data).then((result) => {
+              // 将请求锁解开
+              this.isRepeat = false
               // this.result = this.result.concat(result)
               // 测试push行不行哦~行是行,解构之后push进去,但是呢?中间有一个歌手的类,为什么?
               // this.result.push(...result)
@@ -143,9 +152,9 @@
       },
       _checkMore(data) {
         const song = data.song
-        // 什么时候hasMore变false,当歌曲列表没有长度或者 当前已经加载歌曲数量 + 当前歌曲页数 * 每一页歌曲数量
+        // 什么时候hasMore变false,当歌曲列表没有长度或者 当前已经加载歌曲数量 + 当前歌曲页数 * 每一页歌曲数量 大于 总歌曲数量
         // 假设totalnum为30条内容,那么是什么样的结果呢? song.curnum当前歌曲数量?是20吗? 当前歌曲页数是1吗?每一页歌曲数量20 那就40,满足,那就不加载
-        // 剩余的10条吗?不合理啊,待会测试一测试
+        // 剩余的10条吗?不合理啊,待会测试一测试(因为是先加载进去,再去判断还有没有更多,所以这10条被添加进数组了,判断30 >= 30 ,所以没有更多的歌曲了,设置hasMore为false)
         if (!song.list.length || (song.curnum + (song.curpage - 1) * perpage) >= song.totalnum) {
           this.hasMore = false
         }

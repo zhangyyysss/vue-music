@@ -49,9 +49,13 @@ module.exports = {
     index: path.resolve(__dirname, '../dist/index.html'),
 
     // Paths
+    // https://juejin.cn/post/6844903702419996685
+    // assetsRoot:构建输出目录 也就是构建后的东西都扔这里,
+    // assetsSubDirectory:资源子目录 除了index.html，其余的js img css都分在这里
+    // assetsPublicPath:项目目录 ，是根目录的意思
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '',
+    assetsPublicPath: './',
 
     /**
      * Source Maps

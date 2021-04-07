@@ -52,7 +52,54 @@ const devWebpackConfig = merge(baseWebpackConfig, {
       poll: config.dev.poll,
     },
     // https://blog.csdn.net/HermitSun/article/details/86766299 Axios+Express简单实现前后端通信
-    before(app){//前端请求我们代理服务器地址 ,我们的代理服务器再去请求qq音乐的服务器
+    before(app){//前端请求我们代理服务器地址 ,我们的express代理服务器再去请求qq音乐的服务器(也可以用webpack的proxy来做代理)
+      /*对从QQ官网获取的接口数据做了处理，
+            拼接出轮播图需要的图片 url 和链接跳转的 url，
+            其中链接跳转 url 的生成逻辑则是通过点击PC站点轮播图跳转的 url 分析得到的*/
+      app.get('/api/getTopBanner', function(req, res) {
+        const url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
+        const jumpPrefixMap = {
+          10002: 'https://y.qq.com/n/yqq/album/',
+          10014: 'https://y.qq.com/n/yqq/playlist/',
+          10012: 'https://y.qq.com/n/yqq/mv/v/'
+        }
+
+        axios.get(url, {
+          headers: {
+            referer: 'https://u.y.qq.com/',
+            host: 'u.y.qq.com'
+          },
+          params: req.query
+        }).then((response) => {
+          response = response.data
+          if (response.code === 0) {
+            const slider = []
+            const content = response.focus.data && response.focus.data.content
+            if (content) {
+              for (let i = 0; i < content.length; i++) {
+                const item = content[i]
+                const sliderItem = {}
+                const jumpPrefix = jumpPrefixMap[item.type || 10002]
+                sliderItem.id = item.id
+                sliderItem.linkUrl = jumpPrefix + item.jump_info.url + '.html'
+                sliderItem.picUrl = item.pic_info.url
+                slider.push(sliderItem)
+              }
+            }
+            res.json({
+              code: 0,
+              data: {
+                slider
+              }
+            })
+          } else {
+            res.json(response)
+          }
+        }).catch((e) => {
+          console.log(e)
+        })
+      })
+
       app.get('/api/getDiscList', (req, res) => {//到代理服务器接收到地址为/api/getDiscList的get请求会执行以下操作
         const url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_diss_by_tag.fcg'//真正的qq音乐推荐地址
         axios.get(url, {//这个对象可以配置请求头

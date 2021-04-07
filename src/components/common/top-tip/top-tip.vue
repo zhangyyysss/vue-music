@@ -47,7 +47,7 @@
     position fixed
     top 0
     width 100%
-    z-index 500
+    z-index 3000
     background $color-dialog-background
     &.drop-enter-active,&.drop-leave-active
       transition all .3s

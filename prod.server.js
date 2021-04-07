@@ -2,7 +2,7 @@
 // 当然也可以使用nginx 服务器,里面也可以设置跨域
 /* 起服务：将打包后的代码运行在服务之上 */
 var express = require('express')
-// var compression = require('compression')
+var compression = require('compression')
 var config = require('./config/index')
 var axios = require('axios')
 // express中的post请求体解析的中间件body-parser
@@ -115,10 +115,10 @@ app.post('/api/getPurlUrl', bodyParser.json(), function (req, res) {
 // 把路由容器挂载到app服务中
 app.use('/api', apiRoutes)
 // 开启gzip配置压缩...要写在静态资源托管之前,否则失败
-// app.use(compression())
+app.use(compression())
 
 /* Express框架：提供了static中间件来设置静态文件的资源 */
-app.use(express.static('./dist')) //express设置静态文件(所以会打开dist/index.html)
+app.use(express.static('./dist')) //express设置静态文件入口(所以会打开dist/index.html)
 /* 起端口 */
 module.exports = app.listen(port, function (err) {
   if (err) {

@@ -70,7 +70,7 @@
     },
     methods: {
       _initScroll() {
-        // 判断如果没有wrapper标签直接return,不执行下面创建BScroll的操作
+        // 判断如果没有wrapper标签直接return,不执行下面创建BScroll的操作?
         if (!this.$refs.wrapper) {
           return
         }

@@ -36,7 +36,7 @@
       .tab-link
         padding-bottom 5px
         color $color-text-l
-
+      // router-link-exact-active 也可以
       &.router-link-active
         .tab-link
           color $color-theme

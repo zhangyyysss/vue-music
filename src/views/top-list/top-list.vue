@@ -1,7 +1,7 @@
 <template>
-  <div class="top-list">
+  <transition name="slide" class="top-list" appear>
     <music-list :rank="true" :title="title" :bg-image="bgImage" :songs="songs"></music-list>
-  </div>
+  </transition>
 </template>
 
 <script>

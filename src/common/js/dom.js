@@ -39,3 +39,21 @@ export function prefixStyle(style) {
 
   return vendor + style.charAt(0).toUpperCase() + style.substr(1)
 }
+
+export function addClass(el, className) {
+  if (hasClass(el, className)) {
+    return
+  }
+  // 先split变成数组,
+  let newClass = el.className.split(' ')
+  // 再往数组里面push需要添加的className
+  newClass.push(className)
+  // 在把数组使用join使用空格间隔隔开,返回的是一个有空格间隔字符串
+  el.className = newClass.join(' ')
+}
+
+export function hasClass(el, className) {
+  // '(^|\\s)' 意思是直接开头或者是空白字符(\\s,第一个\是转译) 结尾是空白字符结尾或者直接结束
+  let reg = new RegExp('(^|\\s)' + className + '(\\s|$)')
+  return reg.test(el.className)
+}
