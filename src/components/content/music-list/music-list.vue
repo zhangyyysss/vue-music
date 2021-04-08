@@ -85,11 +85,12 @@
       this.listenScroll = true
     },
     mounted() {
-      // 将背景图片的clientHeight高度存储在变量this.imageHeight中
+      // 将背景图片的clientHeight高度(其实就是padding-top的值70%)存储在变量this.imageHeight中
       this.imageHeight = this.$refs.bgImage.clientHeight
+      // 计算出layer移动的最大距离(因为移动是反向的,所以是负值,所以是最小的值(最大的移动值),RESERVE_HEIGHT是一个固定的高度,就是我们在顶部40px就停止了)
       this.minTranslateY = -this.imageHeight + RESERVE_HEIGHT
-      // 给歌曲列表固定top值,因为list没有设置top值,以bottom作为底部
-      // 我们需要设置top来限制滚动区域的同时,和bg-layer同步
+      // 给歌曲列表固定top值,因为list没有设置top值,以bottom作为底部,从底部开始向上蔓延(因为后面如果有播放歌曲,我们可以设置bottom:60px预留给mini播放器)
+      // 我们需要设置top来限制滚动区域的同时,和bg-layer黑色层同步
       this.$refs.list.$el.style.top = `${this.imageHeight}px`
     },
     methods: {

@@ -81,7 +81,7 @@
               items: []
             }
           }
-          // 各自的key中的items推入我们的各自的歌手
+          // 各自的key中的items推入我们的各自的歌手(热门已经跑到热门,A跑到A,B跑到B......,但是还不是有序列表)
           map[key].items.push(new Singer({
             id: item.Fsinger_mid,
             name: item.Fsinger_name
@@ -90,18 +90,24 @@
         // 为了得到有序列表,我们 需要处理map
         let hot = []
         let ret = []
+        // 遍历map
         for (let key in map) {
+          // val是一个每一个对象 val对象: { title: a, items: [啊栏,啊一] }.... { title: b, item: [ 宝哥, 豹哥 ] }
+          // match() 方法可在字符串内检索指定的值，或找到一个或多个正则表达式的匹配。
+          // 该方法类似 indexOf() 和 lastIndexOf()，但是它返回指定的值，而不是字符串的位置。
           let val = map[key]
+          // 返回匹配的所有a-z或者A-Z的val对象然后push进ret数组中(未必是顺序排列)
           if (val.title.match(/[a-zA-Z]/)) {
             ret.push(val)
           } else if (val.title === HOT_NAME) {
             hot.push(val)
           }
         }
-        // 拿到 a-z的数组
+        // 我们使用ret中的全是英文字母分类的val对象进行排序,使用里面的title(就是英文字母a-z,A-Z)的charCodeAt(0) 的值进行排序
         ret.sort((a, b) => {
           return a.title.charCodeAt(0) - b.title.charCodeAt(0)
         })
+        // hot.concat(ret) ,所以是热门数组在前面,其他英文字母按顺序排列的数组在后面
         return hot.concat(ret)
       },
       ...mapMutations({

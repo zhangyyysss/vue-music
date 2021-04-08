@@ -7,8 +7,9 @@
         <div class="slider-wrapper" v-if="recommends.length > 0">
           <slider>
             <div v-for="(item, index) in recommends" :key="index">
-              <a :href="item.linkUrl">
-                <img :src="item.picUrl" alt="">
+              <a>
+                <!-- 图片加载完以后做刷新，防止scroll高度计算不对 -->
+                <img :src="item.picUrl" alt="" @load="imgLoad()">
               </a>
             </div>
           </slider>
@@ -69,6 +70,13 @@
       this._getDiscList()
     },
     methods: {
+      imgLoad() {
+        // checkLoaded防止图片加载完的刷新多次调用
+        if (!this.checkLoaded) {
+          this.$refs.recommendContent.refresh()
+          this.checkLoaded = true
+        }
+      },
       _getRecommend() {
         getRecommend().then((res) => {
           if (res.code === ERR_OK) {
